@@ -1,0 +1,9 @@
+{% extends "core/settings/settings_base.html" %}
+
+{% block settings_content %}
+    <form method="post">
+        {% csrf_token %}
+        {% include "basesignup/section_based/configuration_form.html" %}
+        <input type="submit" class="btn btn-primary" value="Save">
+    </form>
+    {% endblock %}
