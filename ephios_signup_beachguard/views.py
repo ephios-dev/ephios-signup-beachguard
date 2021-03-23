@@ -2,6 +2,7 @@ import io
 from datetime import date
 from math import ceil
 
+from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.forms import HiddenInput, Field
@@ -12,7 +13,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
 from dynamic_preferences.registries import global_preferences_registry
-from ephios.core.models import Shift, AbstractParticipation
+from ephios.core.models import Event, Shift, AbstractParticipation
 from ephios.core.views.settings import SettingsViewMixin
 from ephios.plugins.basesignup.signup.section_based import SectionBasedConfigurationForm
 from reportlab.lib import colors
@@ -44,19 +45,25 @@ class BeachguardSectionSettingsView(SettingsViewMixin, FormView):
 
 @login_required
 def pdf_export(request, *args, **kwargs):
+    events = request.POST.getlist("bulk_action")
+    if not events:
+        messages.info(request, _("No events have been selected."))
+        return redirect(reverse("core:event_list"))
+
     buffer = io.BytesIO()
     p = SimpleDocTemplate(
         buffer,
         pagesize=landscape(A4),
-        title="ephios beachguard export",
+        title=_("Roster"),
         leftMargin=0.6 * cm,
         rightMargin=1 * cm,
         topMargin=0.2 * cm,
-        bottomMargin=1 * cm,
+        bottomMargin=0.5 * cm,
     )
     style = getSampleStyleSheet()
-    story = [Paragraph("Dienstplan", style=style["Title"])]
-    shifts = Shift.objects.filter(signup_method_slug=BeachguardSignupMethod.slug).order_by("start_time")
+    story = [Paragraph("Roster", style=style["Title"])]
+    shifts = Shift.objects.filter(signup_method_slug=BeachguardSignupMethod.slug, event__in=events).order_by("start_time")
+    events_with_other_methods = Event.objects.filter(Q(id__in=events), ~Q(shifts__in=shifts))
 
     # create a matrix of sections and shifts which contain the corresponding participations.
     # this is a separate step to calculate the number of rows we need for each section.
@@ -115,8 +122,10 @@ def pdf_export(request, *args, **kwargs):
         story.append(table)
         story.append(Spacer(width=20*cm, height=0.4*cm))
 
+    story.append(Paragraph(_("Other events: {description}").format(description=", ".join([f"{event.title} ({date_format(event.get_start_time(), format='SHORT_DATETIME_FORMAT')} - {date_format(event.get_end_time(), format='SHORT_DATETIME_FORMAT')})" for event in events_with_other_methods]))))
+    story.append(Spacer(width=20 * cm, height=0.1 * cm))
     story.append(Paragraph(_("as of: {date}").format(date=date_format(date.today(), format="SHORT_DATE_FORMAT"))))
 
     p.build(story)
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=False, filename="beachguard.pdf")
+    return FileResponse(buffer, as_attachment=False, filename="ephios.pdf")
