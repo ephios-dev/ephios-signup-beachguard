@@ -24,5 +24,5 @@ def register_beachguard_settingsview(sender, request, **kwargs):
 @receiver(register_event_bulk_action)
 def register_pdf_export_action(sender, **kwargs):
     return [
-        '<button class="btn btn-secondary mr-1" type="submit" name="delete"formaction="{url}"><span class="fa fa-file-pdf"></span> {text}</button>'.format(url=reverse("signup_beachguard:pdf_export"), text=_("Export roster for selected"))
+        dict(url=reverse("signup_beachguard:pdf_export"), title=_("Export roster for selected"), icon="fa-file-pdf")
     ]
