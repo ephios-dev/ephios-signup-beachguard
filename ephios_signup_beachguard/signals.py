@@ -24,5 +24,5 @@ def register_beachguard_settingsview(sender, request, **kwargs):
 @receiver(register_event_bulk_action)
 def register_pdf_export_action(sender, **kwargs):
     return [
-        dict(url=reverse("signup_beachguard:pdf_export"), title=_("Export roster for selected"), icon="fa-file-pdf")
+        dict(url=reverse("signup_beachguard:pdf_export"), label=_("Export roster for selected"), icon="fa-file-pdf")
     ]
