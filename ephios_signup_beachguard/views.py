@@ -63,7 +63,7 @@ def pdf_export(request, *args, **kwargs):
         bottomMargin=0.5 * cm,
     )
     style = getSampleStyleSheet()
-    story = [Paragraph("Roster", style=style["Title"])]
+    story = [Paragraph(_("Roster"), style=style["Title"])]
 
     # create a matrix of sections and shifts which contain the corresponding participations.
     # this is a separate step to calculate the number of rows we need for each section.
