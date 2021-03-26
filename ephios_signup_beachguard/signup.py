@@ -8,7 +8,7 @@ from ephios.plugins.basesignup.signup.section_based import SectionBasedSignupMet
 class BeachguardSignupMethod(SectionBasedSignupMethod):
     configuration_form_class = Form
     slug = "beachguard"
-    verbose_name = _("Beachguard")
+    verbose_name = _("Signup for beachguard events")
     description = _(
         """This plugin provides a signup method for beach guards where there are regular shifts which all share the same configuration"""
     )

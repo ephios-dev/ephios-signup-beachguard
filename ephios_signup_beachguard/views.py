@@ -46,8 +46,10 @@ class BeachguardSectionSettingsView(SettingsViewMixin, FormView):
 @login_required
 def pdf_export(request, *args, **kwargs):
     events = request.POST.getlist("bulk_action")
-    if not events:
-        messages.info(request, _("No events have been selected."))
+    shifts = Shift.objects.filter(signup_method_slug=BeachguardSignupMethod.slug, event__in=events).order_by("start_time")
+    events_with_other_methods = Event.objects.filter(Q(id__in=events), ~Q(shifts__in=shifts))
+    if not events or not shifts:
+        messages.info(request, _("No events with the beachguard signup method have been selected."))
         return redirect(reverse("core:event_list"))
 
     buffer = io.BytesIO()
@@ -62,8 +64,6 @@ def pdf_export(request, *args, **kwargs):
     )
     style = getSampleStyleSheet()
     story = [Paragraph("Roster", style=style["Title"])]
-    shifts = Shift.objects.filter(signup_method_slug=BeachguardSignupMethod.slug, event__in=events).order_by("start_time")
-    events_with_other_methods = Event.objects.filter(Q(id__in=events), ~Q(shifts__in=shifts))
 
     # create a matrix of sections and shifts which contain the corresponding participations.
     # this is a separate step to calculate the number of rows we need for each section.
