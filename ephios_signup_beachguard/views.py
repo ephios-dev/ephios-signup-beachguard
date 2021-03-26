@@ -128,4 +128,4 @@ def pdf_export(request, *args, **kwargs):
 
     p.build(story)
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=False, filename="ephios.pdf")
+    return FileResponse(buffer, as_attachment=True, filename="ephios.pdf")
