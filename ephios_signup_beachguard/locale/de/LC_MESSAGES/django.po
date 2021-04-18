@@ -24,7 +24,7 @@ msgstr "Anmeldeverfahren für Strandwachdienste"
 
 #: .\ephios_signup_beachguard\signals.py:27
 msgid "Export roster for selected"
-msgstr "Diensplan für ausgewählte Veranstaltungen exportieren"
+msgstr "Dienstplan für ausgewählte Veranstaltungen exportieren"
 
 #: .\ephios_signup_beachguard\signup.py:11
 msgid "Signup for beachguard events"
