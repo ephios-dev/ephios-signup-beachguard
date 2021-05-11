@@ -72,7 +72,7 @@ def pdf_export(request, *args, **kwargs):
         participations[section["uuid"]] = {}
         for shift in shifts:
             participations[section["uuid"]][shift.pk] = AbstractParticipation.objects.filter(
-                shift=shift, data__dispatched_section_uuid=section["uuid"]
+                shift=shift, data__dispatched_section_uuid=section["uuid"], state=AbstractParticipation.States.CONFIRMED
             )
         participations[section["uuid"]]["row_count"] = max(len(max(participations[section["uuid"]].values(), key=lambda key: len(key))), section["min_count"])
         participations[section["uuid"]]["title"] = section["title"]
