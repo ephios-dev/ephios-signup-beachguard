@@ -6,7 +6,6 @@ from ephios.plugins.basesignup.signup.section_based import SectionBasedSignupMet
 
 
 class BeachguardSignupMethod(SectionBasedSignupMethod):
-    configuration_form_class = Form
     slug = "beachguard"
     verbose_name = _("Signup for beachguard events")
     description = _(
@@ -16,6 +15,13 @@ class BeachguardSignupMethod(SectionBasedSignupMethod):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         setattr(self.configuration, "sections", global_preferences_registry.manager()["beachguard__sections"])
+
+    @property
+    def configuration_form_class(self):
+        class ConfigurationForm(super().configuration_form_class):
+            sections = None
+
+        return ConfigurationForm
 
     def render_configuration_form(self, *args, form=None, **kwargs):
         form = form or self.get_configuration_form(*args, **kwargs)

@@ -34,7 +34,7 @@ class BeachguardSectionSettingsView(SettingsViewMixin, FormView):
             self.request.POST or None,
             initial={"sections": global_preferences_registry.manager()["beachguard__sections"]}
         )
-        form.fields["sections"] = Field(widget=HiddenInput, required=False)
+        form.fields = {"sections": Field(widget=HiddenInput, required=False)}
         return form
 
     def form_valid(self, form):
