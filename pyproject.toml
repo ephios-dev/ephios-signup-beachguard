@@ -7,7 +7,6 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-ephios = "*"
 
 [tool.poetry.dev-dependencies]
 ephios = {path = "../ephios", develop = true}
