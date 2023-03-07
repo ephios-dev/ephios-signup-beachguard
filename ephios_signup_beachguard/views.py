@@ -14,7 +14,6 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView
 from dynamic_preferences.registries import global_preferences_registry
 from ephios.core.models import Event, Shift, AbstractParticipation
-from ephios.core.views.settings import SettingsViewMixin
 from ephios.plugins.basesignup.signup.section_based import SectionBasedConfigurationForm
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -26,7 +25,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from ephios_signup_beachguard.signup import BeachguardSignupMethod
 
 
-class BeachguardSectionSettingsView(SettingsViewMixin, FormView):
+class BeachguardSectionSettingsView(FormView):
     template_name = "signup_beachguard/sections.html"
 
     def get_form(self, form_class=None):
