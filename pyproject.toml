@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ephios-signup-beachguard"
-version = "0.1.4"
+version = "0.1.5"
 description = "This plugin provides a signup method for beach guards where there are regular shifts which all share the same configuration"
 authors = ["Julian Baumann <julian@ephios.de>"]
 license = "MIT"

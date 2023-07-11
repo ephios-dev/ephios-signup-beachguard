@@ -19,13 +19,7 @@ class BeachguardSignupMethod(SectionBasedSignupMethod):
     @property
     def configuration_form_class(self):
         class ConfigurationForm(super().configuration_form_class):
+            template_name = "core/signup_configuration_form.html"
             sections = None
 
         return ConfigurationForm
-
-    def render_configuration_form(self, *args, form=None, **kwargs):
-        form = form or self.get_configuration_form(*args, **kwargs)
-        template = Template(
-            template_string="{% load crispy_forms_filters %}{{ form|crispy }}"
-        ).render(Context({"form": form}))
-        return template
