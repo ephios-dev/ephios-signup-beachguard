@@ -14,7 +14,11 @@ class BeachguardSignupMethod(SectionBasedSignupMethod):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        setattr(self.configuration, "sections", global_preferences_registry.manager()["beachguard__sections"])
+        setattr(
+            self.configuration,
+            "sections",
+            global_preferences_registry.manager()["beachguard__sections"],
+        )
 
     @property
     def configuration_form_class(self):

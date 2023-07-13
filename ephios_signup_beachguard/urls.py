@@ -5,5 +5,5 @@ from ephios_signup_beachguard.views import BeachguardSectionSettingsView, pdf_ex
 app_name = "signup_beachguard"
 urlpatterns = [
     path("settings/beachguard/", BeachguardSectionSettingsView.as_view(), name="sections"),
-    path("beachguard/pdf/", pdf_export, name="pdf_export")
+    path("beachguard/pdf/", pdf_export, name="pdf_export"),
 ]

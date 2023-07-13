@@ -31,13 +31,16 @@ class BeachguardSectionSettingsView(FormView):
     def get_form(self, form_class=None):
         form = SectionBasedConfigurationForm(
             self.request.POST or None,
-            initial={"sections": global_preferences_registry.manager()["beachguard__sections"]}
+            initial={"sections": global_preferences_registry.manager()["beachguard__sections"]},
+            event=None,
         )
         form.fields = {"sections": Field(widget=HiddenInput, required=False)}
         return form
 
     def form_valid(self, form):
-        global_preferences_registry.manager()["beachguard__sections"] = form.cleaned_data["sections"]
+        global_preferences_registry.manager()["beachguard__sections"] = form.cleaned_data[
+            "sections"
+        ]
         messages.success(self.request, _("Sections saved successfully."))
         return redirect(reverse("signup_beachguard:sections"))
 
@@ -45,10 +48,15 @@ class BeachguardSectionSettingsView(FormView):
 @login_required
 def pdf_export(request, *args, **kwargs):
     events = request.POST.getlist("bulk_action")
-    shifts = Shift.objects.filter(signup_method_slug=BeachguardSignupMethod.slug, event__in=events).order_by("start_time")
+    shifts = Shift.objects.filter(
+        signup_method_slug=BeachguardSignupMethod.slug, event__in=events
+    ).order_by("start_time")
     events_with_other_methods = Event.objects.filter(Q(id__in=events), ~Q(shifts__in=shifts))
     if not events or not shifts:
-        messages.info(request, _("No events with the beachguard signup method have been selected."))
+        messages.info(
+            request,
+            _("No events with the beachguard signup method have been selected."),
+        )
         return redirect(reverse("core:event_list"))
 
     buffer = io.BytesIO()
@@ -71,26 +79,32 @@ def pdf_export(request, *args, **kwargs):
         participations[section["uuid"]] = {}
         for shift in shifts:
             participations[section["uuid"]][shift.pk] = AbstractParticipation.objects.filter(
-                shift=shift, data__dispatched_section_uuid=section["uuid"], state=AbstractParticipation.States.CONFIRMED
+                shift=shift,
+                data__dispatched_section_uuid=section["uuid"],
+                state=AbstractParticipation.States.CONFIRMED,
             )
-        participations[section["uuid"]]["row_count"] = max(len(max(participations[section["uuid"]].values(), key=lambda key: len(key))), section["min_count"])
+        participations[section["uuid"]]["row_count"] = max(
+            len(max(participations[section["uuid"]].values(), key=lambda key: len(key))),
+            section["min_count"],
+        )
         participations[section["uuid"]]["title"] = section["title"]
 
     # sort the sections ascending by row_count to create a nice look in the export
-    participations = {k: v for k, v in sorted(participations.items(), key=lambda item: item[1]["row_count"])}
+    participations = {
+        k: v for k, v in sorted(participations.items(), key=lambda item: item[1]["row_count"])
+    }
 
     # build the table header with the section names
     header = [""]
     for section_uuid, section_participations in participations.items():
         header.extend([section_participations["title"]] * section_participations["row_count"])
 
-
-    for chunk in range(0, ceil(shifts.count()/9)):
+    for chunk in range(0, ceil(shifts.count() / 9)):
         columns = []
         columns.append(header)
 
         # finally build the table contents
-        for shift in shifts[chunk*9:(chunk+1)*9]:
+        for shift in shifts[chunk * 9 : (chunk + 1) * 9]:
             column = [date_format(shift.start_time, "DATE_FORMAT")]
             for section_uuid, section_participations in participations.items():
                 participant_rows = []
@@ -98,14 +112,18 @@ def pdf_export(request, *args, **kwargs):
                     last_name = participation.participant.last_name
                     if len(participation.participant.first_name) + len(last_name) > 17:
                         last_name = "{initals}.".format(initals=last_name[0])
-                    participant_name = "{first} {last}".format(first=participation.participant.first_name, last=last_name)
+                    participant_name = "{first} {last}".format(
+                        first=participation.participant.first_name, last=last_name
+                    )
                     participant_rows.append(participant_name)
                 if len(participant_rows) < section_participations["row_count"]:
-                    participant_rows.extend([""] * (section_participations["row_count"] - len(participant_rows)))
+                    participant_rows.extend(
+                        [""] * (section_participations["row_count"] - len(participant_rows))
+                    )
                 column.extend(participant_rows)
             columns.append(column)
 
-        table = Table([list(x) for x in zip(*columns)], colWidths=[2.8 * cm]*10, hAlign="LEFT")
+        table = Table([list(x) for x in zip(*columns)], colWidths=[2.8 * cm] * 10, hAlign="LEFT")
         table.setStyle(
             TableStyle(
                 [
@@ -119,11 +137,26 @@ def pdf_export(request, *args, **kwargs):
             )
         )
         story.append(table)
-        story.append(Spacer(width=20*cm, height=0.4*cm))
+        story.append(Spacer(width=20 * cm, height=0.4 * cm))
 
-    story.append(Paragraph(_("Other events: {description}").format(description=", ".join([f"{event.title} ({date_format(event.get_start_time(), format='SHORT_DATETIME_FORMAT')} - {date_format(event.get_end_time(), format='SHORT_DATETIME_FORMAT')})" for event in events_with_other_methods]))))
+    story.append(
+        Paragraph(
+            _("Other events: {description}").format(
+                description=", ".join(
+                    [
+                        f"{event.title} ({date_format(event.get_start_time(), format='SHORT_DATETIME_FORMAT')} - {date_format(event.get_end_time(), format='SHORT_DATETIME_FORMAT')})"
+                        for event in events_with_other_methods
+                    ]
+                )
+            )
+        )
+    )
     story.append(Spacer(width=20 * cm, height=0.1 * cm))
-    story.append(Paragraph(_("as of: {date}").format(date=date_format(date.today(), format="SHORT_DATE_FORMAT"))))
+    story.append(
+        Paragraph(
+            _("as of: {date}").format(date=date_format(date.today(), format="SHORT_DATE_FORMAT"))
+        )
+    )
 
     p.build(story)
     buffer.seek(0)
